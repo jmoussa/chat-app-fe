@@ -1,74 +1,31 @@
 import React from "react";
-import { Redirect } from "react-router-dom";
 
-import {
-  Box,
-  Stack,
-  Button,
-  defaultTheme,
-} from "@jmoussa/luxor-component-library";
+import { Box, Stack, Button, defaultTheme } from "luxor-component-library";
 
 class Home extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      isLoggedIn: false,
-    };
-    this.onClickHandler = this.onClickHandler.bind(this);
-  }
-
-  onClickHandler(e) {
-    console.log("Login Event:");
-    console.log(e);
-    this.setState({ isLoggedIn: true });
-  }
-
   render() {
-    const { isLoggedIn } = this.state;
-    if (isLoggedIn) {
-      return <Redirect to="/dashboard" />;
-    } else {
-      return (
-        <Box
-          padding="large"
-          margin="0"
-          backgroundColor={defaultTheme.palette.grey[100]}
-        >
-          <Stack>
-            <Box padding="medium">
-              <label for="uname">
-                <b>Username</b>
-              </label>
-              <input
-                type="text"
-                placeholder="Enter Username"
-                name="uname"
-                required
-              />
-
-              <label for="psw">
-                <b>Password</b>
-              </label>
-              <input
-                type="password"
-                placeholder="Enter Password"
-                name="psw"
-                required
-              />
-            </Box>
-            <Box>
-              <Button
-                variant="solid"
-                color="primary"
-                size="small"
-                text="Login"
-                onClick={this.onClickHandler}
-              />
-            </Box>
-          </Stack>
-        </Box>
-      );
-    }
+    return (
+      <Box
+        padding="large"
+        margin="0"
+        height="100vh"
+        backgroundColor={defaultTheme.palette.grey[100]}
+        textAlign="center"
+      >
+        <Stack>
+          <Box padding="medium">Welcome Home</Box>
+          <Box
+            backgroundColor={defaultTheme.palette.common.black}
+            color={defaultTheme.palette.common.white}
+            margin="0px"
+            padding="large"
+            height="800px"
+          >
+            Here we will have a home feed
+          </Box>
+        </Stack>
+      </Box>
+    );
   }
 }
 

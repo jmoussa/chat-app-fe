@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Stack,
-  Row,
-  defaultTheme,
-} from "@jmoussa/luxor-component-library";
+import { Box, Stack, Row, defaultTheme } from "luxor-component-library";
 
 class Dashboard extends React.Component {
   componentDidMount() {
@@ -16,6 +11,7 @@ class Dashboard extends React.Component {
       <Box
         margin="none"
         padding="large"
+        height="100vh"
         backgroundColor={defaultTheme.palette.grey[100]}
       >
         <Row>

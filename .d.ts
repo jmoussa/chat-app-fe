@@ -1,1 +1,1 @@
-declare module "@jmoussa/luxor-component-library";
+declare module "luxor-component-library";

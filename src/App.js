@@ -1,34 +1,25 @@
 import "./App.css";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+//import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Login from "./pages/Login";
+import NavBar from "./components/NavBar";
+
+import { Route, BrowserRouter, Switch } from "react-router-dom";
+
 function App() {
   return (
-    <Router>
-      <div>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/dashboard">Dashboard</Link>
-            </li>
-          </ul>
-        </nav>
-
-        {/* A <Switch> looks through its children <Route>s and
-            renders the first one that matches the current URL. */}
+    <BrowserRouter>
+      <div className="app">
+        <NavBar />
         <Switch>
-          <Route path="/dashboard">
-            <Dashboard />
-          </Route>
-          <Route path="/">
-            <Home />
-          </Route>
+          <Route path="/login" component={Login} />
+          <ProtectedRoute path="/dashboard" page={Dashboard} />
+          <ProtectedRoute path="" page={Home} />
         </Switch>
       </div>
-    </Router>
+    </BrowserRouter>
   );
 }
 
