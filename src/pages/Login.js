@@ -1,22 +1,80 @@
 import React from "react";
 import { Redirect } from "react-router-dom";
-
-import { Box, Stack, Button, defaultTheme } from "luxor-component-library";
+import { login, register } from "../api/auth";
+import { Box, Stack, Row, Button, defaultTheme } from "luxor-component-library";
 
 class Login extends React.Component {
   constructor() {
     super();
     this.state = {
       isLoggedIn: false,
+      username: "",
+      password: "",
     };
-    this.onClickHandler = this.onClickHandler.bind(this);
+    this.loginHandler = this.loginHandler.bind(this);
+    this.registerHandler = this.registerHandler.bind(this);
+    this.passwordChange = this.passwordChange.bind(this);
+    this.usernameChange = this.usernameChange.bind(this);
   }
 
-  onClickHandler(e) {
-    console.log("Login Event:");
-    console.log(e);
-    localStorage.setItem("token", "testToken");
-    this.setState({ isLoggedIn: true });
+  usernameChange(e) {
+    this.setState({
+      username: e.target.value,
+    });
+  }
+
+  passwordChange(e) {
+    this.setState({
+      password: e.target.value,
+    });
+  }
+
+  loginHandler(e) {
+    //API Call then set token to response
+    e.preventDefault();
+    fetch(login, {
+      method: "PUT",
+      headers: {
+        accept: "application/json",
+      },
+      body: JSON.stringify({
+        username: this.state.username,
+        password: this.state.password,
+      }),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+        localStorage.setItem("token", response);
+        this.setState({ isLoggedIn: true });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  registerHandler(e) {
+    //API Call then set token to response
+    e.preventDefault();
+    fetch(register, {
+      method: "PUT",
+      headers: {
+        accept: "application/json",
+      },
+      body: JSON.stringify({
+        username: this.state.username,
+        password: this.state.password,
+      }),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+        localStorage.setItem("token", response);
+        this.setState({ isLoggedIn: true });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   render() {
@@ -38,6 +96,7 @@ class Login extends React.Component {
                 <b>Username</b>
               </label>
               <input
+                onchange={this.usernameChange}
                 type="text"
                 placeholder="Enter Username"
                 name="uname"
@@ -48,21 +107,33 @@ class Login extends React.Component {
                 <b>Password</b>
               </label>
               <input
+                onchange={this.passwordChange}
                 type="password"
                 placeholder="Enter Password"
                 name="psw"
                 required
               />
             </Box>
-            <Box>
-              <Button
-                variant="solid"
-                color="primary"
-                size="small"
-                text="Login"
-                onClick={this.onClickHandler}
-              />
-            </Box>
+            <Row>
+              <Box>
+                <Button
+                  variant="solid"
+                  color="primary"
+                  size="medium"
+                  text="Login"
+                  onClick={this.loginHandler}
+                />
+              </Box>
+              <Box>
+                <Button
+                  variant="outline"
+                  color="primary"
+                  size="medium"
+                  text="Register"
+                  onClick={this.registerHandler}
+                />
+              </Box>
+            </Row>
           </Stack>
         </Box>
       );
