@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Box, Stack, Button, defaultTheme } from "luxor-component-library";
+import { Box, Stack, defaultTheme } from "luxor-component-library";
 
 class Home extends React.Component {
   render() {

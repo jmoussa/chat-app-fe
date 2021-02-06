@@ -10,6 +10,7 @@ class Login extends React.Component {
       isLoggedIn: false,
       username: "",
       password: "",
+      error_message: "",
     };
     this.loginHandler = this.loginHandler.bind(this);
     this.registerHandler = this.registerHandler.bind(this);
@@ -32,21 +33,26 @@ class Login extends React.Component {
   loginHandler(e) {
     //API Call then set token to response
     e.preventDefault();
+    let details = {
+      username: this.state.username,
+      password: this.state.password,
+    };
     fetch(login, {
-      method: "PUT",
+      method: "POST",
       headers: {
         accept: "application/json",
       },
-      body: JSON.stringify({
-        username: this.state.username,
-        password: this.state.password,
-      }),
+      body: JSON.stringify(details),
     })
       .then((response) => response.json())
       .then((response) => {
-        console.log(response);
-        localStorage.setItem("token", response);
-        this.setState({ isLoggedIn: true });
+        console.log(response.access_token);
+        if (response.access_token !== undefined) {
+          localStorage.setItem("token", response.access_token);
+          this.setState({ isLoggedIn: true });
+        } else {
+          this.setState({ error_message: "Please try again." });
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -69,8 +75,12 @@ class Login extends React.Component {
       .then((response) => response.json())
       .then((response) => {
         console.log(response);
-        localStorage.setItem("token", response);
-        this.setState({ isLoggedIn: true });
+        if (response.access_token !== undefined) {
+          localStorage.setItem("token", response.access_token);
+          this.setState({ isLoggedIn: true });
+        } else {
+          this.setState({ error_message: "Please try again." });
+        }
       })
       .catch((err) => {
         console.log(err);
