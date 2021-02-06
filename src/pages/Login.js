@@ -99,7 +99,7 @@ class Login extends React.Component {
   render() {
     const { isLoggedIn, error_message } = this.state;
     if (isLoggedIn) {
-      return <Redirect push to="/dashboard" />;
+      return <Redirect push to="" />;
     } else {
       return (
         <Box
