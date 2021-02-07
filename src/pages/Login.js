@@ -2,7 +2,6 @@ import React from "react";
 import { Redirect } from "react-router-dom";
 import { login, register } from "../api/auth";
 import { Box, Stack, Row, Button, defaultTheme } from "luxor-component-library";
-//import qs from "qs";
 import axios from "axios";
 
 class Login extends React.Component {
