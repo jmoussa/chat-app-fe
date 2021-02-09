@@ -26,6 +26,7 @@ class Home extends React.Component {
       .get(get_room + "/" + room_name)
       .then((response) => {
         if (response.data) {
+          console.log(response.data);
           this.setState({ roomNav: response.data.room_name });
         }
       })
