@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
-import { get_rooms, get_room } from "../api/rooms";
+import { create_room, get_rooms, get_room } from "../api/rooms";
+import { get_user_from_token } from "../api/auth";
 import { Box, Stack, Button, defaultTheme } from "luxor-component-library";
 import { Redirect } from "react-router-dom";
 
@@ -12,6 +13,31 @@ class Home extends React.Component {
       currentUser: null,
       roomNav: false,
     };
+  }
+
+  startNewRoomClick(e) {
+    e.preventDefault();
+    let body = {
+      room_name: "test_room",
+      username: this.state.currentUser,
+    };
+    let token = localStorage.getItem("token");
+    const instance = axios.create({
+      timeout: 1000,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    instance
+      .put(create_room, body)
+      .then((response) => {
+        if (response.data) {
+          console.log(response.data);
+          this.setState({ roomNav: response.data.room_name });
+        }
+      })
+      .catch((err) => {
+        localStorage.removeItem("token");
+        console.log("ERROR FETCHING SINGLE ROOM: \n" + err);
+      });
   }
 
   handleRoomClick(e) {
@@ -41,19 +67,32 @@ class Home extends React.Component {
     // Fetch all rooms (need to setup credentials from current user)
     let token = localStorage.getItem("token");
     const instance = axios.create({
-      baseURL: get_rooms,
       timeout: 1000,
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        Authorization: `Bearer ${token}`,
+      },
     });
     instance
-      .get(get_rooms)
+      .get(get_user_from_token)
       .then((response) => {
-        this.setState({ rooms: response.data });
+        this.setState({
+          currentUser: response.data.username,
+        });
+        instance
+          .get(get_rooms)
+          .then((response) => {
+            this.setState({ rooms: response.data });
+          })
+          .catch((err) => {
+            // clear token just in case
+            localStorage.removeItem("token");
+            console.log("ERROR FETCHING ROOMS: \n" + err);
+          });
       })
       .catch((err) => {
-        // clear token just in case
         localStorage.removeItem("token");
-        console.log("ERROR FETCHING ROOMS: \n" + err);
+        console.log("ERROR FETCHING CURRENT USER\n" + err);
       });
   }
 
@@ -78,6 +117,7 @@ class Home extends React.Component {
                 size="medium"
                 color="primary"
                 text="Start a room"
+                onClick={(e) => this.startNewRoomClick(e)}
               />
             </Box>
             <Box>

@@ -46,6 +46,7 @@ class Login extends React.Component {
       headers: {
         "content-type": "application/x-www-form-urlencoded;charset=utf-8",
         accept: "application/json",
+        "Access-Control-Allow-Origin": "*",
       },
     };
     axios
@@ -74,6 +75,7 @@ class Login extends React.Component {
       method: "PUT",
       headers: {
         accept: "application/json",
+        "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
         username: this.state.username,

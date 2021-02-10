@@ -4,13 +4,30 @@ import {
   Button,
   Row,
   Stack,
-  Input,
+  //Input,
   defaultTheme,
   fontSizes,
 } from "luxor-component-library";
 import { get_room } from "../api/rooms";
 import { get_user_from_token } from "../api/auth";
 import axios from "axios";
+
+var room_name = window.location.pathname.split("/")[
+  window.location.pathname.split("/").length - 1
+];
+
+var client = null;
+
+function checkWebSocket(username) {
+  if (client === null || client.readyState === WebSocket.CLOSED) {
+    room_name = window.location.pathname.split("/")[
+      window.location.pathname.split("/").length - 1
+    ];
+    client = new WebSocket(
+      "ws://localhost:8000/ws/" + room_name + "/" + username
+    );
+  }
+}
 
 class ChatModule extends React.Component {
   constructor(props) {
@@ -20,6 +37,7 @@ class ChatModule extends React.Component {
       isLoaded: false,
       currentUser: this.props.user,
       message_draft: "",
+      messages: [],
     };
     this.onClickHandler = this.onClickHandler.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
@@ -29,47 +47,76 @@ class ChatModule extends React.Component {
     console.log("Input change: " + event.target.value);
     this.setState({ message_draft: event.target.value });
   }
-
-  onClickHandler() {
-    console.log("Sending: " + this.state.message_draft);
-  }
-
   componentDidMount() {
-    if (!this.props.user) {
-      let token = localStorage.getItem("token");
-      const instance = axios.create({
-        timeout: 1000,
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      instance
-        .get(get_user_from_token)
-        .then((response) => {
-          this.setState({
-            currentUser: response.data.username,
-          });
-        })
-        .catch((err) => {
-          localStorage.removeItem("token");
-          console.log("ERROR FETCHING CURRENT USER\n" + err);
-        });
-    }
-    // Fetch room, set messages, users
-    const { room_name } = this.props;
+    room_name = window.location.pathname.split("/")[
+      window.location.pathname.split("/").length - 1
+    ];
+
     let token = localStorage.getItem("token");
     const instance = axios.create({
       timeout: 1000,
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        Authorization: `Bearer ${token}`,
+      },
     });
+    // Fetch user info and instantiates websocket
     instance
-      .get(get_room + "/" + room_name)
-      .then((response) => {
-        console.log(response.data);
-        this.setState({ ...response.data, isLoaded: true });
+      .get(get_user_from_token)
+      .then((res) => {
+        // Fetch room, set messages, users
+        instance
+          .get(get_room + "/" + room_name)
+          .then((response) => {
+            console.log(response.data);
+            this.setState({ ...response.data, isLoaded: true });
+
+            let client = new WebSocket(
+              "ws://localhost:8000/ws/" + room_name + "/" + res.data.username
+            );
+            this.setState({
+              currentUser: res.data.username,
+            });
+            client.onopen = () => {
+              console.log("WebSocket Client Connected");
+            };
+            client.onmessage = (event) => {
+              let message = event.data;
+              console.log("Message sent: " + message);
+              let message_body = {
+                content: message,
+                user: response.data,
+              };
+              let messages_arr = this.state.messages;
+              messages_arr.push(message_body);
+              this.setState({ messages: messages_arr });
+            };
+          })
+          .catch((err) => {
+            console.log("ERROR FETCHING ROOM\n" + err);
+          });
       })
       .catch((err) => {
         localStorage.removeItem("token");
-        console.log("ERROR FETCHING ROOM\n" + err);
+        console.log("ERROR FETCHING CURRENT USER\n" + err);
       });
+  }
+
+  onClickHandler(event) {
+    event.preventDefault();
+    var input = this.state.message_draft;
+    if (input.length > 0) {
+      var message_obj = {
+        message: input,
+        sender: this.state.currentUser,
+      };
+      if (client !== null) {
+        client.send(JSON.stringify(message_obj));
+        this.setState({ message_draft: "" });
+      } else {
+        checkWebSocket(this.state.currentUser);
+      }
+    }
   }
 
   render() {
@@ -177,6 +224,7 @@ class ChatModule extends React.Component {
             <Row padding="medium" space="small">
               <Box padding="small">
                 <input
+                  id="messageText"
                   style={input_text_style}
                   value={this.state.message_draft}
                   onChange={this.onInputChange}
