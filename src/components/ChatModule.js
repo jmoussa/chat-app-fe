@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { animateScroll } from "react-scroll";
+
 import {
   Box,
   Button,
@@ -32,6 +34,7 @@ function checkWebSocket(username) {
 class ChatModule extends React.Component {
   constructor(props) {
     super(props);
+    this.messagesEndRef = React.createRef();
     this.state = {
       room: {},
       isLoaded: false,
@@ -41,10 +44,17 @@ class ChatModule extends React.Component {
     };
     this.onClickHandler = this.onClickHandler.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
+    this.onEnterHandler = this.onEnterHandler.bind(this);
   }
-
   onInputChange(event) {
+    console.log("Input changed: " + event.target.value);
     this.setState({ message_draft: event.target.value });
+  }
+  scrollToBottom() {
+    animateScroll.scrollToBottom({
+      containerId: "message-list",
+      duration: "1ms",
+    });
   }
   componentDidMount() {
     room_name = window.location.pathname.split("/")[
@@ -90,7 +100,7 @@ class ChatModule extends React.Component {
               };
               let messages_arr = this.state.messages;
               messages_arr.push(message_body);
-              this.setState({ messages: messages_arr });
+              this.setState({ messages: messages_arr }, this.scrollToBottom);
             };
           })
           .catch((err) => {
@@ -102,6 +112,15 @@ class ChatModule extends React.Component {
         console.log("ERROR FETCHING CURRENT USER\n" + err);
       });
   }
+
+  onEnterHandler = (event) => {
+    // Number 13 is the "Enter" key on the keyboard
+    if (event.keyCode === 13) {
+      // Trigger the button element with a click
+      event.preventDefault();
+      this.onClickHandler(event);
+    }
+  };
 
   onClickHandler(event) {
     event.preventDefault();
@@ -117,7 +136,7 @@ class ChatModule extends React.Component {
       };
       if (client !== null) {
         client.send(JSON.stringify(message_obj));
-        this.setState({ message_draft: "" });
+        this.setState({ message_draft: "" }, this.scrollToBottom);
       } else {
         checkWebSocket(this.state.currentUser);
       }
@@ -164,6 +183,7 @@ class ChatModule extends React.Component {
                 height: "600px",
                 width: "800px",
               }}
+              id="message-list"
             >
               <Stack>
                 {messages.map((message, index) => {
@@ -233,6 +253,7 @@ class ChatModule extends React.Component {
                   style={input_text_style}
                   value={this.state.message_draft}
                   onChange={this.onInputChange}
+                  onKeyUp={(e) => this.onEnterHandler(e)}
                 />
               </Box>
               <Box padding="small">
@@ -282,6 +303,7 @@ export { ChatModule };
                   width="600px"
                   roundedCorners="2rem"
                   value={this.state.message_draft}
+                  onKeyUp={(e) => this.onEnterHandler(e)}
                   onChange={this.onInputChange}
                   placeholder="Message"
                 />
