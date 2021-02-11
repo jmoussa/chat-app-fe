@@ -27,7 +27,7 @@ class Home extends React.Component {
       headers: { Authorization: `Bearer ${token}` },
     });
     instance
-      .put(create_room, body)
+      .post(create_room, body)
       .then((response) => {
         if (response.data) {
           console.log(response.data);
