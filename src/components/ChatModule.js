@@ -191,7 +191,10 @@ class ChatModule extends React.Component {
                     <div
                       style={{
                         display: "flex",
-                        flexDirection: "row",
+                        flexDirection:
+                          message.user.username === this.state.currentUser
+                            ? "row"
+                            : "row-reverse",
                         float:
                           message.user.username === this.state.currentUser
                             ? "right"
