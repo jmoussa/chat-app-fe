@@ -44,7 +44,6 @@ class ChatModule extends React.Component {
   }
 
   onInputChange(event) {
-    console.log("Input change: " + event.target.value);
     this.setState({ message_draft: event.target.value });
   }
   componentDidMount() {
@@ -68,24 +67,26 @@ class ChatModule extends React.Component {
         instance
           .get(get_room + "/" + room_name)
           .then((response) => {
-            console.log(response.data);
+            //console.log("Room info: \n" + response.data);
             this.setState({ ...response.data, isLoaded: true });
-
-            let client = new WebSocket(
-              "ws://localhost:8000/ws/" + room_name + "/" + res.data.username
-            );
+            if (client == null) {
+              client = new WebSocket(
+                "ws://localhost:8000/ws/" + room_name + "/" + res.data.username
+              );
+            }
             this.setState({
               currentUser: res.data.username,
+              user: res.data,
             });
             client.onopen = () => {
               console.log("WebSocket Client Connected");
             };
             client.onmessage = (event) => {
-              let message = event.data;
-              console.log("Message sent: " + message);
+              let message = JSON.parse(event.data);
+              //console.log(message);
               let message_body = {
-                content: message,
-                user: response.data,
+                content: message["content"],
+                user: message["user"],
               };
               let messages_arr = this.state.messages;
               messages_arr.push(message_body);
@@ -104,11 +105,15 @@ class ChatModule extends React.Component {
 
   onClickHandler(event) {
     event.preventDefault();
+    room_name = window.location.pathname.split("/")[
+      window.location.pathname.split("/").length - 1
+    ];
     var input = this.state.message_draft;
     if (input.length > 0) {
       var message_obj = {
-        message: input,
-        sender: this.state.currentUser,
+        content: input,
+        user: { username: this.state.currentUser },
+        room_name: room_name,
       };
       if (client !== null) {
         client.send(JSON.stringify(message_obj));
