@@ -1,6 +1,6 @@
 # Chat App FE
 
-This repository will hold the front end code for the new iteration of the [python_websockets_chatroom_app](https://github.com/jmoussa/python_websockets_chatroom_app)
+This repository will hold the front end code for the new iteration of the [chat_app_BE](https://github.com/jmoussa/chat_app_BE)
 
 ## Architecture
 
