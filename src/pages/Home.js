@@ -2,7 +2,14 @@ import React from "react";
 import axios from "axios";
 import { create_room, get_rooms, get_room } from "../api/rooms";
 import { get_user_from_token } from "../api/auth";
-import { Box, Stack, Button, defaultTheme } from "luxor-component-library";
+import {
+  Box,
+  Stack,
+  Row,
+  Button,
+  Input,
+  defaultTheme,
+} from "luxor-component-library";
 import { Redirect } from "react-router-dom";
 
 class Home extends React.Component {
@@ -12,13 +19,30 @@ class Home extends React.Component {
       rooms: [],
       currentUser: null,
       roomNav: false,
+      new_room_name: "",
     };
+    this.onInputChange = this.onInputChange.bind(this);
+    this.onEnterHandler = this.onEnterHandler.bind(this);
   }
+
+  onInputChange(event) {
+    console.log("Input: " + event.target.value);
+    this.setState({ new_room_name: event.target.value });
+  }
+
+  onEnterHandler = (event) => {
+    // Number 13 is the "Enter" key on the keyboard
+    if (event.keyCode === 13) {
+      // Trigger the button element with a click
+      event.preventDefault();
+      this.startNewRoomClick(event);
+    }
+  };
 
   startNewRoomClick(e) {
     e.preventDefault();
     let body = {
-      room_name: "test_room",
+      room_name: this.state.new_room_name,
       username: this.state.currentUser,
     };
     let token = localStorage.getItem("token");
@@ -103,7 +127,7 @@ class Home extends React.Component {
     } else {
       return (
         <Box
-          margin="0"
+          padding="medium"
           backgroundColor={defaultTheme.palette.grey[100]}
           textAlign="center"
         >
@@ -111,30 +135,53 @@ class Home extends React.Component {
             <Box padding="medium">
               <h1>Welcome Home</h1>
             </Box>
-            <Box marginX="xxxlarge">
-              <Button
-                variant="solid"
-                size="medium"
-                color="primary"
-                text="Start a room"
-                onClick={(e) => this.startNewRoomClick(e)}
-              />
-            </Box>
+            <Row
+              space="none"
+              width="50%"
+              justifyContent="center"
+              alignItems="center"
+              textAlign="center"
+              style={{ margin: "auto" }}
+            >
+              <Box style={{ margin: "0 auto" }}>
+                <Input
+                  color="secondary"
+                  size="medium"
+                  width="500px"
+                  roundedCorners="2rem"
+                  value={this.state.new_room_name}
+                  onKeyUp={(e) => this.onEnterHandler(e)}
+                  onChange={this.onInputChange}
+                  placeholder="New Room Name"
+                />
+              </Box>
+              <Box style={{ margin: "0 auto" }}>
+                <Button
+                  variant="solid"
+                  size="medium"
+                  color="primary"
+                  text="Create Room"
+                  onClick={(e) => this.startNewRoomClick(e)}
+                />
+              </Box>
+            </Row>
             <Box>
               <h2>Rooms</h2>
-              <Stack>
+              <Stack space="medium">
                 {rooms.map((room, index) => {
                   return (
-                    <Button
-                      padding="small"
-                      backgroundColor={defaultTheme.palette.primary.main}
-                      roundedCorners
-                      marginX="xxxlarge"
-                      key={{ index }}
-                      text={room.room_name}
-                      id={room.room_name}
-                      onClick={(e) => this.handleRoomClick(e)}
-                    />
+                    <Box>
+                      <Button
+                        padding="small"
+                        backgroundColor={defaultTheme.palette.primary.main}
+                        roundedCorners
+                        marginX="xxxlarge"
+                        key={{ index }}
+                        text={room.room_name}
+                        id={room.room_name}
+                        onClick={(e) => this.handleRoomClick(e)}
+                      />
+                    </Box>
                   );
                 })}
               </Stack>
