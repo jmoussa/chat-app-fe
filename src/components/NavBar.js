@@ -25,17 +25,6 @@ class NavBar extends React.Component {
             Home
           </NavLink>
         </Box>
-        <Box paddingX="small">
-          <NavLink
-            style={{
-              textDecoration: "none",
-              color: defaultTheme.palette.common.white,
-            }}
-            to="/dashboard"
-          >
-            Dashboard
-          </NavLink>
-        </Box>
       </div>
     );
   }

@@ -48,7 +48,7 @@ class Dashboard extends React.Component {
           <Row>
             <Stack>
               <Box textAlign="center">
-                <h1>Welcome to the {room} room</h1>
+                <h1>Welcome to the {decodeURIComponent(room)} room</h1>
                 <ChatModule room_name={room} user={currentUser} />
               </Box>
             </Stack>

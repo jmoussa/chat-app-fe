@@ -105,8 +105,7 @@ class Login extends React.Component {
       return (
         <Box
           padding="large"
-          margin="0"
-          height="100vh"
+          height="720px"
           backgroundColor={defaultTheme.palette.grey[100]}
           textAlign="center"
         >
