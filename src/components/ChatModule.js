@@ -10,7 +10,7 @@ import {
   defaultTheme,
   fontSizes,
 } from "luxor-component-library";
-import { get_room } from "../api/rooms";
+import { get_room, put_user_into_room } from "../api/rooms";
 import { get_user_from_token } from "../api/auth";
 import axios from "axios";
 
@@ -56,6 +56,12 @@ class ChatModule extends React.Component {
       duration: "1ms",
     });
   }
+  componentWillUnmount() {
+    //Disconnect websocket (Should update room members in db)
+    if (client !== null) {
+      client.close();
+    }
+  }
   componentDidMount() {
     room_name = window.location.pathname.split("/")[
       window.location.pathname.split("/").length - 1
@@ -73,38 +79,51 @@ class ChatModule extends React.Component {
     instance
       .get(get_user_from_token)
       .then((res) => {
-        // Fetch room, set messages, users
         instance
-          .get(get_room + "/" + room_name)
-          .then((response) => {
-            //console.log("Room info: \n" + response.data);
-            this.setState({ ...response.data, isLoaded: true });
-            if (client == null) {
-              client = new WebSocket(
-                "ws://localhost:8000/ws/" + room_name + "/" + res.data.username
-              );
-            }
-            this.setState({
-              currentUser: res.data.username,
-              user: res.data,
-            });
-            client.onopen = () => {
-              console.log("WebSocket Client Connected");
-            };
-            client.onmessage = (event) => {
-              let message = JSON.parse(event.data);
-              //console.log(message);
-              let message_body = {
-                content: message["content"],
-                user: message["user"],
-              };
-              let messages_arr = this.state.messages;
-              messages_arr.push(message_body);
-              this.setState({ messages: messages_arr }, this.scrollToBottom);
-            };
+          .put(put_user_into_room + "/" + room_name)
+          .then((r) => {
+            // Fetch room, set messages, users
+            instance
+              .get(get_room + "/" + room_name)
+              .then((response) => {
+                //console.log("Room info: \n" + response.data);
+                this.setState({ ...response.data, isLoaded: true });
+                if (client == null) {
+                  client = new WebSocket(
+                    "ws://localhost:8000/ws/" +
+                      room_name +
+                      "/" +
+                      res.data.username
+                  );
+                }
+                this.setState({
+                  currentUser: res.data.username,
+                  user: res.data,
+                });
+                client.onopen = () => {
+                  console.log("WebSocket Client Connected");
+                };
+                client.onmessage = (event) => {
+                  let message = JSON.parse(event.data);
+                  //console.log(message);
+                  let message_body = {
+                    content: message["content"],
+                    user: message["user"],
+                  };
+                  let messages_arr = this.state.messages;
+                  messages_arr.push(message_body);
+                  this.setState(
+                    { messages: messages_arr },
+                    this.scrollToBottom
+                  );
+                };
+              })
+              .catch((err) => {
+                console.error("ERROR FETCHING ROOM\n" + err);
+              });
           })
           .catch((err) => {
-            console.log("ERROR FETCHING ROOM\n" + err);
+            console.error("Error adding user to room\n" + err);
           });
       })
       .catch((err) => {
