@@ -130,11 +130,21 @@ class Home extends React.Component {
     } else {
       return (
         <Box
-          padding="medium"
+          padding="small"
+          paddingY="xlarge"
+          style={{
+            height: "100vh",
+          }}
           backgroundColor={defaultTheme.palette.grey[100]}
+          color={defaultTheme.palette.common.black}
           textAlign="center"
         >
-          <Stack space="small" padding="medium">
+          <Stack
+            space="large"
+            padding="medium"
+            roundedCorners
+            marginX="xxxlarge"
+          >
             <Box padding="medium">
               <h1>Welcome Home</h1>
             </Box>
@@ -146,39 +156,37 @@ class Home extends React.Component {
               textAlign="center"
               style={{ margin: "auto" }}
             >
-              <Box style={{ margin: "0 auto" }}>
+              <Box>
                 <Input
                   color="secondary"
                   size="medium"
-                  width="500px"
+                  width="400px"
                   roundedCorners="2rem"
                   value={this.state.new_room_name}
                   onKeyUp={(e) => this.onEnterHandler(e)}
                   onChange={this.onInputChange}
-                  placeholder="New Room Name"
                 />
               </Box>
-              <Box style={{ margin: "0 auto" }}>
+              <Box>
                 <Button
-                  variant="solid"
+                  variant="outline"
                   size="medium"
-                  color="primary"
+                  color="secondary"
                   text="Create Room"
                   onClick={(e) => this.startNewRoomClick(e)}
                 />
               </Box>
             </Row>
             <Box>
-              <h2>Rooms</h2>
+              <h1>Rooms</h1>
               <Stack space="medium">
                 {rooms.map((room, index) => {
                   return (
                     <Box>
                       <Button
-                        padding="small"
-                        backgroundColor={defaultTheme.palette.primary.main}
-                        roundedCorners
-                        marginX="xxxlarge"
+                        variant="solid"
+                        color="secondary"
+                        size="medium"
                         key={{ index }}
                         text={room.room_name}
                         id={room.room_name}

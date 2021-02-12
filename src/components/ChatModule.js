@@ -103,6 +103,14 @@ class ChatModule extends React.Component {
                 client.onopen = () => {
                   console.log("WebSocket Client Connected");
                 };
+                client.onclose = () => {
+                  client = new WebSocket(
+                    "ws://localhost:8000/ws/" +
+                      room_name +
+                      "/" +
+                      res.data.username
+                  );
+                };
                 client.onmessage = (event) => {
                   let message = JSON.parse(event.data);
                   //console.log(message);
@@ -170,7 +178,7 @@ class ChatModule extends React.Component {
       width: "600px",
       borderRadius: "3em",
       outline: "none",
-      border: `2px solid ${defaultTheme.palette.primary.light}`,
+      border: `2px solid ${defaultTheme.palette.error.main}`,
       fontWeight: 400,
       fontSize: fontSizes.medium,
       fontFamily: defaultTheme.typography.primaryFontFamily,
@@ -204,7 +212,7 @@ class ChatModule extends React.Component {
               }}
               id="message-list"
             >
-              <Stack>
+              <Stack space="medium" width="800px">
                 {messages.map((message, index) => {
                   return (
                     <div
@@ -222,16 +230,31 @@ class ChatModule extends React.Component {
                           message.user.username === this.state.currentUser
                             ? "right"
                             : "left",
+                        marginLeft:
+                          message.user.username === this.state.currentUser
+                            ? "400px"
+                            : "auto",
+                        marginRight:
+                          message.user.username === this.state.currentUser
+                            ? "auto"
+                            : "400px",
                       }}
                     >
                       <Box
                         marginX="large"
                         padding="small"
-                        backgroundColor={defaultTheme.palette.primary.light}
-                        color={defaultTheme.palette.common.white}
+                        backgroundColor={
+                          message.user.username === this.state.currentUser
+                            ? defaultTheme.palette.error.main
+                            : defaultTheme.palette.primary.main
+                        }
+                        color={
+                          message.user.username === this.state.currentUser
+                            ? defaultTheme.palette.common.white
+                            : defaultTheme.palette.common.white
+                        }
                         roundedCorners
                         marginBottom="small"
-                        width="400px"
                         style={{
                           float:
                             message.user.username === this.state.currentUser
@@ -268,7 +291,7 @@ class ChatModule extends React.Component {
                 })}
               </Stack>
             </Box>
-            <Row padding="medium" space="small">
+            <Row width="800px" padding="medium" space="small">
               <Box padding="small">
                 <input
                   id="messageText"
@@ -278,39 +301,49 @@ class ChatModule extends React.Component {
                   onKeyUp={(e) => this.onEnterHandler(e)}
                 />
               </Box>
-              <Box padding="small">
+              <Box paddingY="small">
                 <Button
                   variant="outline"
-                  color="secondary"
+                  color="error"
                   size="medium"
+                  style={{
+                    border: `2px solid ${defaultTheme.palette.error.main}`,
+                  }}
                   text="Send"
                   onClick={this.onClickHandler}
                 />
               </Box>
             </Row>
           </Stack>
-          <Stack space="small">
-            <Box>
-              <h1>Room Members</h1>
-            </Box>
-            {members.map((member, index) => {
-              return (
-                <Box
-                  padding="small"
-                  margin="small"
-                  backgroundColor={defaultTheme.palette.secondary.main}
-                  color={defaultTheme.palette.common.black}
-                  marginX="xxxlarge"
-                  roundedCorners
-                  marginBottom="small"
-                  textAlign="center"
-                  key={{ index }}
-                >
-                  {member.username}
-                </Box>
-              );
-            })}
-          </Stack>
+          <Box
+            padding="medium"
+            roundedCorners
+            style={{
+              overflow: "scroll",
+              height: "600px",
+              width: "800px",
+            }}
+          >
+            <Stack space="small">
+              <Box>
+                <h1>Room Members</h1>
+              </Box>
+              {members.map((member, index) => {
+                return (
+                  <Box
+                    padding="small"
+                    color={defaultTheme.palette.common.black}
+                    marginBottom="small"
+                    textAlign="center"
+                    key={{ index }}
+                    roundedCorners
+                  >
+                    {member.username}
+                  </Box>
+                );
+              })}
+            </Stack>
+          </Box>
         </Row>
       );
     }

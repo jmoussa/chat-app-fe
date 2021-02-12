@@ -1,7 +1,14 @@
 import React from "react";
 import { Redirect } from "react-router-dom";
 import { login, register } from "../api/auth";
-import { Box, Stack, Row, Button, defaultTheme } from "luxor-component-library";
+import {
+  Box,
+  Stack,
+  Row,
+  Button,
+  Input,
+  defaultTheme,
+} from "luxor-component-library";
 import axios from "axios";
 
 class Login extends React.Component {
@@ -108,37 +115,42 @@ class Login extends React.Component {
           height="720px"
           backgroundColor={defaultTheme.palette.grey[100]}
           textAlign="center"
+          style={{
+            height: "100vh",
+          }}
         >
           <Stack>
-            <Box padding="medium">
-              <label for="uname">
-                <b>Username</b>
-              </label>
-              <input
+            <Stack space="medium" padding="medium">
+              <Input
                 value={this.state.username}
                 onChange={(e) => {
                   this.usernameChange(e);
                 }}
-                type="text"
                 placeholder="Enter Username"
                 name="uname"
                 required
+                color="secondary"
+                size="medium"
+                width="400px"
+                roundedCorners="2rem"
               />
-
-              <label for="psw">
-                <b>Password</b>
-              </label>
-              <input
-                value={this.state.password}
-                onChange={(e) => {
-                  this.passwordChange(e);
-                }}
-                type="password"
-                placeholder="Enter Password"
-                name="psw"
-                required
-              />
-            </Box>
+              <Box>
+                <Input
+                  value={this.state.password}
+                  onChange={(e) => {
+                    this.passwordChange(e);
+                  }}
+                  type="password"
+                  placeholder="Enter Password"
+                  name="psw"
+                  required
+                  color="secondary"
+                  size="medium"
+                  width="400px"
+                  roundedCorners="2rem"
+                />
+              </Box>
+            </Stack>
             <Row>
               <Box>
                 <Button
