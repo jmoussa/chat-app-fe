@@ -146,7 +146,7 @@ class Home extends React.Component {
             marginX="xxxlarge"
           >
             <Box padding="medium">
-              <h1>Welcome Home</h1>
+              <h1>Welcome Home: {this.state.currentUser}</h1>
             </Box>
             <Row
               space="none"

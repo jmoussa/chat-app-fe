@@ -47,7 +47,6 @@ class ChatModule extends React.Component {
     this.onEnterHandler = this.onEnterHandler.bind(this);
   }
   onInputChange(event) {
-    console.log("Input changed: " + event.target.value);
     this.setState({ message_draft: event.target.value });
   }
   scrollToBottom() {
@@ -81,7 +80,7 @@ class ChatModule extends React.Component {
       .then((res) => {
         instance
           .put(put_user_into_room + "/" + room_name)
-          .then((r) => {
+          .then(() => {
             // Fetch room, set messages, users
             instance
               .get(get_room + "/" + room_name)
@@ -127,6 +126,7 @@ class ChatModule extends React.Component {
                 };
               })
               .catch((err) => {
+                localStorage.removeItem("token");
                 console.error("ERROR FETCHING ROOM\n" + err);
               });
           })
@@ -151,15 +151,12 @@ class ChatModule extends React.Component {
 
   onClickHandler(event) {
     event.preventDefault();
-    room_name = window.location.pathname.split("/")[
-      window.location.pathname.split("/").length - 1
-    ];
     var input = this.state.message_draft;
     if (input.length > 0) {
       var message_obj = {
         content: input,
         user: { username: this.state.currentUser },
-        room_name: room_name,
+        room_name: this.state.room_name,
       };
       if (client !== null) {
         client.send(JSON.stringify(message_obj));
