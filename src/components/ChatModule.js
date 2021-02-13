@@ -20,13 +20,10 @@ var room_name = window.location.pathname.split("/")[
 
 var client = null;
 
-function checkWebSocket(username) {
+function checkWebSocket(username, roomname) {
   if (client === null || client.readyState === WebSocket.CLOSED) {
-    room_name = window.location.pathname.split("/")[
-      window.location.pathname.split("/").length - 1
-    ];
     client = new WebSocket(
-      "ws://localhost:8000/ws/" + room_name + "/" + username
+      "ws://localhost:8000/ws/" + roomname + "/" + username
     );
   }
 }
@@ -86,7 +83,7 @@ class ChatModule extends React.Component {
               .get(get_room + "/" + room_name)
               .then((response) => {
                 //console.log("Room info: \n" + response.data);
-                this.setState({ ...response.data, isLoaded: true });
+                this.setState({ room: { ...response.data }, isLoaded: true });
                 if (client == null) {
                   client = new WebSocket(
                     "ws://localhost:8000/ws/" +
@@ -103,26 +100,28 @@ class ChatModule extends React.Component {
                   console.log("WebSocket Client Connected");
                 };
                 client.onclose = () => {
-                  client = new WebSocket(
-                    "ws://localhost:8000/ws/" +
-                      room_name +
-                      "/" +
-                      res.data.username
-                  );
+                  console.log("Websocket Disconnected");
                 };
                 client.onmessage = (event) => {
                   let message = JSON.parse(event.data);
-                  //console.log(message);
-                  let message_body = {
-                    content: message["content"],
-                    user: message["user"],
-                  };
-                  let messages_arr = this.state.messages;
-                  messages_arr.push(message_body);
-                  this.setState(
-                    { messages: messages_arr },
-                    this.scrollToBottom
-                  );
+                  if (
+                    message.hasOwnProperty("type") &&
+                    (message.type === "dismissal" ||
+                      message.type === "entrance")
+                  ) {
+                    this.setState({ room: message["new_room_obj"] });
+                  } else {
+                    let message_body = {
+                      content: message["content"],
+                      user: message["user"],
+                    };
+                    let messages_arr = this.state.messages;
+                    messages_arr.push(message_body);
+                    this.setState(
+                      { messages: messages_arr },
+                      this.scrollToBottom
+                    );
+                  }
                 };
               })
               .catch((err) => {
@@ -162,7 +161,7 @@ class ChatModule extends React.Component {
         client.send(JSON.stringify(message_obj));
         this.setState({ message_draft: "" }, this.scrollToBottom);
       } else {
-        checkWebSocket(this.state.currentUser);
+        checkWebSocket(this.state.currentUser, this.state.room_name);
       }
     }
   }
@@ -181,7 +180,7 @@ class ChatModule extends React.Component {
       fontFamily: defaultTheme.typography.primaryFontFamily,
       color: defaultTheme.palette.grey[400],
     };
-    const { isLoaded, messages, members } = this.state;
+    const { isLoaded, room, messages } = this.state;
     if (!isLoaded) {
       return (
         <Box
@@ -296,6 +295,7 @@ class ChatModule extends React.Component {
                   value={this.state.message_draft}
                   onChange={this.onInputChange}
                   onKeyUp={(e) => this.onEnterHandler(e)}
+                  autocomplete="off"
                 />
               </Box>
               <Box paddingY="small">
@@ -325,7 +325,7 @@ class ChatModule extends React.Component {
               <Box>
                 <h1>Room Members</h1>
               </Box>
-              {members.map((member, index) => {
+              {room.members.map((member, index) => {
                 return (
                   <Box
                     padding="small"
