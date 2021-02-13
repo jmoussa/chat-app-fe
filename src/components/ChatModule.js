@@ -109,7 +109,10 @@ class ChatModule extends React.Component {
                     (message.type === "dismissal" ||
                       message.type === "entrance")
                   ) {
-                    this.setState({ room: message["new_room_obj"] });
+                    this.setState({
+                      room: message["new_room_obj"],
+                      messages: message["new_room_obj"]["messages"],
+                    });
                   } else {
                     let message_body = {
                       content: message["content"],
@@ -155,13 +158,13 @@ class ChatModule extends React.Component {
       var message_obj = {
         content: input,
         user: { username: this.state.currentUser },
-        room_name: this.state.room_name,
+        room_name: this.state.room.room_name,
       };
       if (client !== null) {
         client.send(JSON.stringify(message_obj));
         this.setState({ message_draft: "" }, this.scrollToBottom);
       } else {
-        checkWebSocket(this.state.currentUser, this.state.room_name);
+        checkWebSocket(this.state.currentUser, this.state.room.room_name);
       }
     }
   }
