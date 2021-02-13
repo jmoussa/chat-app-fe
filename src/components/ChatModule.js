@@ -83,7 +83,7 @@ class ChatModule extends React.Component {
               .get(get_room + "/" + room_name)
               .then((response) => {
                 //console.log("Room info: \n" + response.data);
-                this.setState({ room: { ...response.data }, isLoaded: true });
+                this.setState({ ...response.data, isLoaded: true });
                 if (client == null) {
                   client = new WebSocket(
                     "ws://localhost:8000/ws/" +
@@ -110,8 +110,7 @@ class ChatModule extends React.Component {
                       message.type === "entrance")
                   ) {
                     this.setState({
-                      room: message["new_room_obj"],
-                      messages: message["new_room_obj"]["messages"],
+                      ...message["new_room_obj"],
                     });
                   } else {
                     let message_body = {
@@ -158,13 +157,13 @@ class ChatModule extends React.Component {
       var message_obj = {
         content: input,
         user: { username: this.state.currentUser },
-        room_name: this.state.room.room_name,
+        room_name: this.state.room_name,
       };
       if (client !== null) {
         client.send(JSON.stringify(message_obj));
         this.setState({ message_draft: "" }, this.scrollToBottom);
       } else {
-        checkWebSocket(this.state.currentUser, this.state.room.room_name);
+        checkWebSocket(this.state.currentUser, this.state.room_name);
       }
     }
   }
@@ -183,7 +182,7 @@ class ChatModule extends React.Component {
       fontFamily: defaultTheme.typography.primaryFontFamily,
       color: defaultTheme.palette.grey[400],
     };
-    const { isLoaded, room, messages } = this.state;
+    const { isLoaded, messages, members } = this.state;
     if (!isLoaded) {
       return (
         <Box
@@ -328,7 +327,7 @@ class ChatModule extends React.Component {
               <Box>
                 <h1>Room Members</h1>
               </Box>
-              {room.members.map((member, index) => {
+              {members.map((member, index) => {
                 return (
                   <Box
                     padding="small"
