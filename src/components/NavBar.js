@@ -24,6 +24,15 @@ class NavBar extends React.Component {
           >
             Home
           </NavLink>
+          <NavLink
+            style={{
+              textDecoration: "none",
+              color: defaultTheme.palette.common.white,
+            }}
+            to="/profile"
+          >
+            Home
+          </NavLink>
         </Box>
       </div>
     );
