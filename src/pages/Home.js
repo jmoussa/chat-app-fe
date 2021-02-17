@@ -2,6 +2,8 @@ import React from "react";
 import axios from "axios";
 import { create_room, get_rooms, get_room } from "../api/rooms";
 import { get_user_from_token } from "../api/auth";
+import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
+import FavoriteIcon from "@material-ui/icons/Favorite";
 import {
   Box,
   Stack,
@@ -181,19 +183,37 @@ class Home extends React.Component {
               <h1>Rooms</h1>
               <Stack space="medium">
                 {rooms.map((room, index) => {
-                  return (
-                    <Box>
-                      <Button
-                        variant="solid"
-                        color="secondary"
-                        size="medium"
-                        key={{ index }}
-                        text={room.room_name}
-                        id={room.room_name}
-                        onClick={(e) => this.handleRoomClick(e)}
-                      />
-                    </Box>
-                  );
+                  if (user.favorites.includes(room.room_name)) {
+                    return (
+                      <Box>
+                        <Button
+                          variant="solid"
+                          color="secondary"
+                          size="medium"
+                          key={{ index }}
+                          text={room.room_name}
+                          id={room.room_name}
+                          onClick={(e) => this.handleRoomClick(e)}
+                        />
+                        <FavoriteBorderIcon />
+                      </Box>
+                    );
+                  } else {
+                    return (
+                      <Box>
+                        <Button
+                          variant="solid"
+                          color="secondary"
+                          size="medium"
+                          key={{ index }}
+                          text={room.room_name}
+                          id={room.room_name}
+                          onClick={(e) => this.handleRoomClick(e)}
+                        />
+                        <FavoriteIcon />
+                      </Box>
+                    );
+                  }
                 })}
               </Stack>
             </Box>
