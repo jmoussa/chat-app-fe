@@ -4,6 +4,7 @@ import { create_room, get_rooms, get_room, favorites } from "../api/rooms";
 import { get_user_from_token } from "../api/auth";
 import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
 import FavoriteIcon from "@material-ui/icons/Favorite";
+import Chip from "@material-ui/core/Chip";
 import {
   Box,
   Stack,
@@ -29,9 +30,7 @@ class Home extends React.Component {
     this.removeFavorite = this.removeFavorite.bind(this);
   }
 
-  addFavorite(e) {
-    let fav = e.currentTarget.dataset.roomName;
-    //console.log("adding favorite: " + fav);
+  addFavorite(e, fav) {
     e.preventDefault();
     let body = {
       favorites: [fav],
@@ -47,8 +46,6 @@ class Home extends React.Component {
       .post(favorites, body)
       .then((response) => {
         if (response.data) {
-          //console.log("Added favorite:");
-          //console.log(response.data);
           this.setState({ user: response.data });
         }
       })
@@ -58,9 +55,7 @@ class Home extends React.Component {
       });
   }
 
-  removeFavorite(e) {
-    let fav = e.currentTarget.dataset.roomName;
-    //console.log("removing favorite: " + fav);
+  removeFavorite(e, fav) {
     e.preventDefault();
     let body = {
       favorite: fav,
@@ -246,43 +241,33 @@ class Home extends React.Component {
                 {rooms.map((room, index) => {
                   if (user.favorites.includes(room.room_name)) {
                     return (
-                      <Row>
-                        <Button
-                          variant="solid"
-                          color="secondary"
-                          size="medium"
-                          key={{ index }}
-                          text={room.room_name}
-                          id={room.room_name}
+                      <Box>
+                        <Chip
+                          icon={FavoriteIcon}
                           onClick={(e) => this.handleRoomClick(e)}
+                          label={room.room_name}
+                          id={room.room_name}
+                          key={index}
+                          onDelete={(e) =>
+                            this.removeFavorite(e, room.room_name)
+                          }
+                          deleteIcon={<FavoriteIcon />}
                         />
-                        <div
-                          data-room-name={room.room_name}
-                          onClick={this.removeFavorite}
-                        >
-                          <FavoriteIcon />
-                        </div>
-                      </Row>
+                      </Box>
                     );
                   } else {
                     return (
-                      <Row>
-                        <Button
-                          variant="solid"
-                          color="secondary"
-                          size="medium"
-                          key={{ index }}
-                          text={room.room_name}
-                          id={room.room_name}
+                      <Box>
+                        <Chip
+                          icon={FavoriteBorderIcon}
                           onClick={(e) => this.handleRoomClick(e)}
+                          label={room.room_name}
+                          id={room.room_name}
+                          key={index}
+                          onDelete={(e) => this.addFavorite(e, room.room_name)}
+                          deleteIcon={<FavoriteBorderIcon />}
                         />
-                        <div
-                          data-room-name={room.room_name}
-                          onClick={this.addFavorite}
-                        >
-                          <FavoriteBorderIcon />
-                        </div>
-                      </Row>
+                      </Box>
                     );
                   }
                 })}
