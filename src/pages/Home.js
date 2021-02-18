@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { create_room, get_rooms, get_room } from "../api/rooms";
+import { create_room, get_rooms, get_room, favorites } from "../api/rooms";
 import { get_user_from_token } from "../api/auth";
 import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
 import FavoriteIcon from "@material-ui/icons/Favorite";
@@ -25,10 +25,70 @@ class Home extends React.Component {
     };
     this.onInputChange = this.onInputChange.bind(this);
     this.onEnterHandler = this.onEnterHandler.bind(this);
+    this.addFavorite = this.addFavorite.bind(this);
+    this.removeFavorite = this.removeFavorite.bind(this);
+  }
+
+  addFavorite(e) {
+    let fav = e.currentTarget.dataset.roomName;
+    //console.log("adding favorite: " + fav);
+    e.preventDefault();
+    let body = {
+      favorites: [fav],
+      username: this.state.currentUser,
+      type: "add",
+    };
+    let token = localStorage.getItem("token");
+    const instance = axios.create({
+      timeout: 1000,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    instance
+      .post(favorites, body)
+      .then((response) => {
+        if (response.data) {
+          //console.log("Added favorite:");
+          //console.log(response.data);
+          this.setState({ user: response.data });
+        }
+      })
+      .catch((err) => {
+        localStorage.removeItem("token");
+        console.log("ERROR FETCHING SINGLE ROOM: \n" + err);
+      });
+  }
+
+  removeFavorite(e) {
+    let fav = e.currentTarget.dataset.roomName;
+    //console.log("removing favorite: " + fav);
+    e.preventDefault();
+    let body = {
+      favorite: fav,
+      username: this.state.currentUser,
+      type: "remove",
+    };
+    let token = localStorage.getItem("token");
+    const instance = axios.create({
+      timeout: 1000,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    instance
+      .post(favorites, body)
+      .then((response) => {
+        if (response.data) {
+          //console.log("Removed favorite:");
+          //console.log(response.data);
+          this.setState({ user: { favorites: response.data.favorites } });
+        }
+      })
+      .catch((err) => {
+        localStorage.removeItem("token");
+        console.log("ERROR FETCHING SINGLE ROOM: \n" + err);
+      });
   }
 
   onInputChange(event) {
-    console.log("Input: " + event.target.value);
+    //console.log("Input: " + event.target.value);
     this.setState({ new_room_name: event.target.value });
   }
 
@@ -56,7 +116,7 @@ class Home extends React.Component {
       .post(create_room, body)
       .then((response) => {
         if (response.data) {
-          console.log(response.data);
+          //console.log(response.data);
           this.setState({ roomNav: response.data.room_name });
         }
       })
@@ -81,7 +141,7 @@ class Home extends React.Component {
       .get(get_room + "/" + room_name)
       .then((response) => {
         if (response.data) {
-          console.log(response.data);
+          //console.log(response.data);
           this.setState({ roomNav: response.data.room_name });
         }
       })
@@ -107,6 +167,7 @@ class Home extends React.Component {
       .then((response) => {
         this.setState({
           currentUser: response.data.username,
+          user: { ...response.data },
         });
         instance
           .get(get_rooms)
@@ -126,7 +187,7 @@ class Home extends React.Component {
   }
 
   render() {
-    const { rooms, roomNav } = this.state;
+    const { rooms, roomNav, user } = this.state;
     if (roomNav && roomNav !== "None") {
       return <Redirect push to={"/dashboard/" + roomNav} />;
     } else {
@@ -185,7 +246,7 @@ class Home extends React.Component {
                 {rooms.map((room, index) => {
                   if (user.favorites.includes(room.room_name)) {
                     return (
-                      <Box>
+                      <Row>
                         <Button
                           variant="solid"
                           color="secondary"
@@ -195,12 +256,17 @@ class Home extends React.Component {
                           id={room.room_name}
                           onClick={(e) => this.handleRoomClick(e)}
                         />
-                        <FavoriteBorderIcon />
-                      </Box>
+                        <div
+                          data-room-name={room.room_name}
+                          onClick={this.removeFavorite}
+                        >
+                          <FavoriteIcon />
+                        </div>
+                      </Row>
                     );
                   } else {
                     return (
-                      <Box>
+                      <Row>
                         <Button
                           variant="solid"
                           color="secondary"
@@ -210,8 +276,13 @@ class Home extends React.Component {
                           id={room.room_name}
                           onClick={(e) => this.handleRoomClick(e)}
                         />
-                        <FavoriteIcon />
-                      </Box>
+                        <div
+                          data-room-name={room.room_name}
+                          onClick={this.addFavorite}
+                        >
+                          <FavoriteBorderIcon />
+                        </div>
+                      </Row>
                     );
                   }
                 })}
