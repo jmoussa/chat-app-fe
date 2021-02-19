@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { create_room, get_rooms, get_room, favorites } from "../api/rooms";
+import { create_room, get_room, favorites } from "../api/rooms";
 import { get_user_from_token } from "../api/auth";
 import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
 import FavoriteIcon from "@material-ui/icons/Favorite";
@@ -15,7 +15,7 @@ import {
 } from "luxor-component-library";
 import { Redirect } from "react-router-dom";
 
-class Home extends React.Component {
+class Favorites extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -165,7 +165,7 @@ class Home extends React.Component {
           user: { ...response.data },
         });
         instance
-          .get(get_rooms)
+          .get(favorites)
           .then((response) => {
             this.setState({ rooms: response.data });
           })
@@ -204,7 +204,7 @@ class Home extends React.Component {
             marginX="xxxlarge"
           >
             <Box padding="medium">
-              <h1>Welcome Home: {this.state.currentUser}</h1>
+              <h1>{this.state.currentUser}'s Favorites</h1>
             </Box>
             <Row
               space="none"
@@ -280,4 +280,4 @@ class Home extends React.Component {
   }
 }
 
-export default Home;
+export default Favorites;
