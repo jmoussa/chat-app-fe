@@ -9,6 +9,8 @@
     "@testing-library/react": "^11.2.3",
     "@testing-library/user-event": "^12.6.2",
     "axios": "^0.21.1",
+    "emoji-js": "^3.5.0",
+    "emoji-picker-react": "^3.4.2",
     "luxor-component-library": "^0.1.42",
     "qs": "^6.9.6",
     "react": "^17.0.1",
