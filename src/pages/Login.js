@@ -6,8 +6,8 @@ import {
   Stack,
   Row,
   Button,
-  Input,
   defaultTheme,
+  fontSizes,
 } from "luxor-component-library";
 import axios from "axios";
 
@@ -105,6 +105,19 @@ class Login extends React.Component {
   }
 
   render() {
+    const input_text_style = {
+      padding: "10px",
+      paddingLeft: "25px",
+      paddingRight: "25px",
+      width: "400px",
+      borderRadius: "3em",
+      outline: "none",
+      border: `2px solid ${defaultTheme.palette.error.main}`,
+      fontWeight: 400,
+      fontSize: fontSizes.medium,
+      fontFamily: defaultTheme.typography.primaryFontFamily,
+      color: defaultTheme.palette.grey[400],
+    };
     const { isLoggedIn, error_message } = this.state;
     if (isLoggedIn) {
       return <Redirect push to="" />;
@@ -121,33 +134,27 @@ class Login extends React.Component {
         >
           <Stack>
             <Stack space="medium" padding="medium">
-              <Input
-                value={this.state.username}
-                onChange={(e) => {
-                  this.usernameChange(e);
-                }}
-                placeholder="Enter Username"
-                name="uname"
-                required
-                color="secondary"
-                size="medium"
-                width="400px"
-                roundedCorners="2rem"
-              />
               <Box>
-                <Input
+                <input
+                  style={input_text_style}
+                  value={this.state.username}
+                  onChange={(e) => this.usernameChange(e)}
+                  autoComplete="off"
+                  placeholder="Enter Username"
+                  name="uname"
+                  required
+                />
+              </Box>
+              <Box>
+                <input
+                  style={input_text_style}
                   value={this.state.password}
-                  onChange={(e) => {
-                    this.passwordChange(e);
-                  }}
-                  type="password"
+                  onChange={(e) => this.passwordChange(e)}
+                  autoComplete="off"
                   placeholder="Enter Password"
                   name="psw"
                   required
-                  color="secondary"
-                  size="medium"
-                  width="400px"
-                  roundedCorners="2rem"
+                  type="password"
                 />
               </Box>
             </Stack>

@@ -10,8 +10,8 @@ import {
   Stack,
   Row,
   Button,
-  Input,
   defaultTheme,
+  fontSizes,
 } from "luxor-component-library";
 import { Redirect } from "react-router-dom";
 
@@ -182,6 +182,19 @@ class Favorites extends React.Component {
   }
 
   render() {
+    const input_text_style = {
+      padding: "10px",
+      paddingLeft: "25px",
+      paddingRight: "25px",
+      width: "400px",
+      borderRadius: "3em",
+      outline: "none",
+      border: `2px solid ${defaultTheme.palette.error.main}`,
+      fontWeight: 400,
+      fontSize: fontSizes.medium,
+      fontFamily: defaultTheme.typography.primaryFontFamily,
+      color: defaultTheme.palette.grey[400],
+    };
     const { rooms, roomNav, user } = this.state;
     if (roomNav && roomNav !== "None") {
       return <Redirect push to={"/dashboard/" + roomNav} />;
@@ -215,14 +228,13 @@ class Favorites extends React.Component {
               style={{ margin: "auto" }}
             >
               <Box>
-                <Input
-                  color="secondary"
-                  size="medium"
-                  width="400px"
-                  roundedCorners="2rem"
+                <input
+                  id="messageText"
+                  style={input_text_style}
                   value={this.state.new_room_name}
-                  onKeyUp={(e) => this.onEnterHandler(e)}
                   onChange={this.onInputChange}
+                  onKeyUp={(e) => this.onEnterHandler(e)}
+                  autoComplete="off"
                 />
               </Box>
               <Box>

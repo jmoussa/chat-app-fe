@@ -9,7 +9,6 @@ import {
   Button,
   Row,
   Stack,
-  //Input,
   defaultTheme,
   fontSizes,
 } from "luxor-component-library";
@@ -425,16 +424,3 @@ class ChatModule extends React.Component {
   }
 }
 export { ChatModule };
-
-/*
-<Input
-                  color="primary"
-                  size="medium"
-                  width="600px"
-                  roundedCorners="2rem"
-                  value={this.state.message_draft}
-                  onKeyUp={(e) => this.onEnterHandler(e)}
-                  onChange={this.onInputChange}
-                  placeholder="Message"
-                />
- */
