@@ -402,9 +402,20 @@ class ChatModule extends React.Component {
                     onEmojiClick={this.onEmojiSelection}
                   />
                 </Box>
-                <SentimentVerySatisfiedIcon
-                  style={{ marginRight: "10px" }}
+                <Button
+                  variant="outline"
+                  color="error"
+                  size="small"
+                  style={{
+                    marginRight: "10px",
+                    border: `2px solid ${defaultTheme.palette.error.main}`,
+                  }}
                   onClick={this.onOpenEmoji}
+                  text={
+                    <SentimentVerySatisfiedIcon
+                    //style={{ marginRight: "10px" }}
+                    />
+                  }
                 />
                 <Button
                   variant="outline"
