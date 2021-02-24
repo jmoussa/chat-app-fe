@@ -20,15 +20,21 @@ var jsemoji = new EmojiConverter();
 jsemoji.replace_mode = "unified";
 jsemoji.allow_native = true;
 
-var room_name = window.location.pathname.split("/")[
-  window.location.pathname.split("/").length - 1
-];
+//var room_name = window.location.pathname.split("/")[
+//window.location.pathname.split("/").length - 1
+//];
 
 var client = null;
 
 function checkWebSocket(username, roomname) {
   if (client === null || client.readyState === WebSocket.CLOSED) {
-    console.log("setting websocket");
+    //console.log(
+    //"setting websocket: " +
+    //"ws://localhost:8000/ws/" +
+    //roomname +
+    //"/" +
+    //username
+    //);
     client = new WebSocket(
       "ws://localhost:8000/ws/" + roomname + "/" + username
     );
@@ -60,10 +66,16 @@ class ChatModule extends React.Component {
   }
   checkWebSocketConnection() {
     if (client === null || client.readyState === WebSocket.CLOSED) {
-      console.log("setting websocket");
+      //console.log("setting websocket");
+      //console.log(
+      //"ws://localhost:8000/ws/" +
+      //this.state.room_name +
+      //"/" +
+      //this.state.currentUser
+      //);
       client = new WebSocket(
         "ws://localhost:8000/ws/" +
-          this.state.room.room_name +
+          this.state.room_name +
           "/" +
           this.state.currentUser
       );
@@ -77,32 +89,49 @@ class ChatModule extends React.Component {
     });
   }
   componentWillUnmount() {
+    //console.log("COMPONENT WILL UNMOUNT");
     //Disconnect websocket (Should update room members in db)
-    if (client !== null) {
-      console.log("Closing WS");
-      client.close();
+    if (client !== null && client.readyState === WebSocket.OPEN) {
+      // Send dismissal message to BE
+      //console.log(this.state.room_name + " closing");
+      var message_obj = {
+        content: this.state.currentUser + " has left the chat",
+        user: { username: this.state.currentUser },
+        room_name: this.state.room_name,
+        type: "dismissal",
+      };
+      console.info("Sending Close Signal to BE");
+      if (client !== null) {
+        client.send(JSON.stringify(message_obj));
+        this.setState({ message_draft: "" }, this.scrollToBottom);
+      } else {
+        client = checkWebSocket(this.state.currentUser, this.state.room_name);
+        client.send(JSON.stringify(message_obj));
+        this.setState({ message_draft: "" }, this.scrollToBottom);
+      }
+      //console.log("Closing client on FE");
+      client.close(1000, "Deliberate disconnection");
     }
+    //console.log("END COMPONENT WILL UNMOUNT");
   }
   onOpenEmoji() {
     let currentState = this.state.openEmoji;
-    console.log("Current emoji state: " + currentState);
-    console.log("Setting emoji state to: " + !currentState);
+    //console.log("Current emoji state: " + currentState);
+    //console.log("Setting emoji state to: " + !currentState);
     this.setState({ openEmoji: !currentState });
   }
   onEmojiSelection(emoji_code, emoji_data) {
     //console.log(emoji_code);
-    console.info("Emoji code\n" + emoji_code);
-    console.info("Emoji data\n" + emoji_data);
+    //console.info("Emoji code\n" + emoji_code);
+    //console.info("Emoji data\n" + emoji_data);
     let e = emoji_data.emoji;
     let _message =
       this.state.message_draft === undefined ? "" : this.state.message_draft;
     this.setState({ message_draft: _message + e });
   }
-  componentDidMount() {
-    room_name = window.location.pathname.split("/")[
-      window.location.pathname.split("/").length - 1
-    ];
 
+  componentDidMount() {
+    //console.log("--- COMPONENT DID MOUNT ---");
     let token = localStorage.getItem("token");
     const instance = axios.create({
       timeout: 1000,
@@ -115,28 +144,28 @@ class ChatModule extends React.Component {
     instance
       .get(get_user_from_token)
       .then((res) => {
+        this.setState({
+          currentUser: res.data.username,
+          user: res.data,
+        });
         instance
-          .put(put_user_into_room + "/" + room_name)
+          .put(
+            put_user_into_room + "/" + decodeURIComponent(this.props.room_name)
+          )
           .then(() => {
             // Fetch room, set messages, users
             instance
-              .get(get_room + "/" + room_name)
+              .get(get_room + "/" + decodeURIComponent(this.props.room_name))
               .then((response) => {
-                //console.log("Room info: \n" + response.data);
-                this.setState({ ...response.data, isLoaded: true });
-                if (client == null) {
-                  client = checkWebSocket(res.data.username, room_name);
-                  //client = new WebSocket(
-                  //"ws://localhost:8000/ws/" +
-                  //room_name +
-                  //"/" +
-                  //res.data.username
-                  //);
-                }
-                this.setState({
-                  currentUser: res.data.username,
-                  user: res.data,
-                });
+                this.setState(
+                  { ...response.data, isLoaded: true },
+                  this.scrollToBottom
+                );
+                console.log("Connecting Websocket");
+                client = checkWebSocket(
+                  res.data.username,
+                  response.data.room_name
+                );
                 client.onopen = () => {
                   console.log("WebSocket Client Connected");
                 };
@@ -174,6 +203,7 @@ class ChatModule extends React.Component {
                     );
                   }
                 };
+                //console.log("--- END COMPONENT DID MOUNT ---");
               })
               .catch((err) => {
                 localStorage.removeItem("token");
@@ -186,7 +216,7 @@ class ChatModule extends React.Component {
       })
       .catch((err) => {
         localStorage.removeItem("token");
-        console.log("ERROR FETCHING CURRENT USER\n" + err);
+        console.error("ERROR FETCHING CURRENT USER\n" + err);
       });
   }
 
