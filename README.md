@@ -1,6 +1,6 @@
 # Chat App FE
 
-This repository will hold the front end code for the new iteration of the [chat_app_BE](https://github.com/jmoussa/chat_app_BE)
+This repository will hold the front end code for the [chat_app_BE](https://github.com/jmoussa/chat_app_BE)
 
 ## Architecture
 
@@ -8,12 +8,19 @@ Running with React and React router dom the main features of this platform will 
 
 - Login/Authentication System
 - Chat Room Lobby
+- Favorite Rooms filter option in navbar
 - Websocket Group Chat
 
+## Screenshots
 
-## Create React App
+![Login](./screenshots/1.jpg)
+![Lobby](./screenshots/2.jpg)
+![Favorites](./screenshots/3.jpg)
+![Chat Room](./screenshots/4.jpg)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Create React App
+
+## This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ### Available Scripts
 
