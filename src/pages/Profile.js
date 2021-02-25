@@ -36,22 +36,26 @@ class Profile extends React.Component {
     e.preventDefault();
   }
   imageUpload(e) {
+    e.preventDefault();
     console.log("Image Upload");
     const files = e.target.files;
+    console.log(files[0]);
     const formData = new FormData();
-    formData.append("myFile", files[0]);
+    formData.append("file", files[0], files[0].name);
 
     let token = localStorage.getItem("token");
     const instance = axios.create({
       timeout: 1000,
       headers: {
+        //"Content-Type": "multipart/form-data",
+        "Content-Type": files[0].type,
         "Access-Control-Allow-Origin": "*",
+        accept: "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: formData,
     });
     instance
-      .post(upload_profile_pic)
+      .post(upload_profile_pic, formData)
       .then((response) => {
         this.setState({ user: response.data, isLoaded: true });
       })
@@ -128,7 +132,6 @@ class Profile extends React.Component {
               <Stack space="medium">
                 <Box>
                   <input
-                    id="messageText"
                     style={input_text_style}
                     value={this.state.new_user.username}
                     placeholder="New Username"
@@ -138,7 +141,6 @@ class Profile extends React.Component {
                 </Box>
                 <Box>
                   <input
-                    id="messageText"
                     style={input_text_style}
                     value={this.state.new_user.password}
                     onChange={this.onPasswordChange}
