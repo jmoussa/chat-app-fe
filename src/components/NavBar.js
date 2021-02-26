@@ -28,11 +28,21 @@ class NavBar extends React.Component {
             style={{
               textDecoration: "none",
               color: defaultTheme.palette.common.white,
-              marginLeft: "20px",
+              marginLeft: "10px",
             }}
             to="/favorites"
           >
             Favorites
+          </NavLink>
+          <NavLink
+            style={{
+              textDecoration: "none",
+              color: defaultTheme.palette.common.white,
+              marginLeft: "10px",
+            }}
+            to="/profile"
+          >
+            Profile
           </NavLink>
         </Box>
       </div>

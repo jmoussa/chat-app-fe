@@ -40,7 +40,10 @@ class Home extends React.Component {
     let token = localStorage.getItem("token");
     const instance = axios.create({
       timeout: 1000,
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        Authorization: `Bearer ${token}`,
+      },
     });
     instance
       .post(favorites, body)
@@ -65,7 +68,10 @@ class Home extends React.Component {
     let token = localStorage.getItem("token");
     const instance = axios.create({
       timeout: 1000,
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        Authorization: `Bearer ${token}`,
+      },
     });
     instance
       .post(favorites, body)
@@ -105,7 +111,10 @@ class Home extends React.Component {
     let token = localStorage.getItem("token");
     const instance = axios.create({
       timeout: 1000,
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        Authorization: `Bearer ${token}`,
+      },
     });
     instance
       .post(create_room, body)
