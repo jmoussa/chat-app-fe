@@ -9,6 +9,8 @@ import {
 import { get_user_from_token, upload_profile_pic } from "../api/auth";
 import axios from "axios";
 import AWS from "aws-sdk";
+import Avatar from "@material-ui/core/Avatar";
+
 class Profile extends React.Component {
   constructor(props) {
     super(props);
@@ -22,7 +24,6 @@ class Profile extends React.Component {
     this.onPasswordChange = this.onPasswordChange.bind(this);
     this.onEnterHandler = this.onEnterHandler.bind(this);
     this.imageUpload = this.imageUpload.bind(this);
-    this.imageDownload = this.imageDownload.bind(this);
   }
 
   onUsernameChange(e) {
@@ -37,34 +38,7 @@ class Profile extends React.Component {
   onEnterHandler(e) {
     e.preventDefault();
   }
-  imageDownload() {
-    const mimes = {
-      jpeg: "data:image/jpeg;base64,",
-      png: "data:image/png;base64,",
-      jpg: "data:image/jpg;base64,",
-    };
-    function encode(data) {
-      var str = data.reduce(function (a, b) {
-        return a + String.fromCharCode(b);
-      }, "");
-      return btoa(str).replace(/.{76}(?=.)/g, "$&\n");
-    }
-    const s3_key = this.state.user.profile_pic_img_src;
-    const s3_bucket = this.state.s3_bucket;
-    let config = require("../config.json");
-    AWS.config.update(config);
-    AWS.config.credentials.get(function () {
-      var bucket = new AWS.S3({ params: { Bucket: s3_bucket } });
-      bucket.getObject({ Key: s3_key }, function (err, file) {
-        if (err) {
-          console.error(err);
-        } else {
-          var result = mimes.jpeg + encode(file.Body);
-          document.getElementById("profile_pic").src = result;
-        }
-      });
-    });
-  }
+
   imageUpload(e) {
     e.preventDefault();
     console.log("Image Upload");
@@ -94,6 +68,7 @@ class Profile extends React.Component {
         console.error(err);
       });
   }
+
   componentDidMount() {
     let token = localStorage.getItem("token");
     const instance = axios.create({
@@ -105,9 +80,41 @@ class Profile extends React.Component {
     });
     instance
       .get(get_user_from_token)
-      .then((response) => {
+      .then(async (response) => {
         this.setState({ user: response.data, isLoaded: true });
-        this.imageDownload();
+        const mimes = {
+          jpeg: "data:image/jpeg;base64,",
+          png: "data:image/png;base64,",
+          jpg: "data:image/jpg;base64,",
+        };
+        function encode(data) {
+          var str = data.reduce(function (a, b) {
+            return a + String.fromCharCode(b);
+          }, "");
+          return btoa(str).replace(/.{76}(?=.)/g, "$&\n");
+        }
+        const s3_key = this.state.user.profile_pic_img_src;
+        const s3_bucket = this.state.s3_bucket;
+        let config = require("../config.json");
+        AWS.config.update(config);
+        AWS.config.credentials.get(
+          function () {
+            var bucket = new AWS.S3({ params: { Bucket: s3_bucket } });
+            bucket.getObject(
+              { Key: s3_key },
+              function (err, file) {
+                if (err) {
+                  console.error(err);
+                } else {
+                  const result = mimes.jpeg + encode(file.Body);
+                  this.setState({
+                    user: { ...this.state.user, profile_pic_img_src: result },
+                  });
+                }
+              }.bind(this)
+            );
+          }.bind(this)
+        );
       })
       .catch((err) => {
         localStorage.removeItem("token");
@@ -130,6 +137,7 @@ class Profile extends React.Component {
       color: defaultTheme.palette.grey[400],
     };
     const { isLoaded, user } = this.state;
+
     if (!isLoaded) {
       return <Box>Loading...</Box>;
     } else {
@@ -143,18 +151,21 @@ class Profile extends React.Component {
           <Row>
             <Box padding="medium">
               <Stack space="medium" textAlign="center">
-                <Box>
-                  <h1>{user.username} Profile</h1>
-                </Box>
-                <Box>
-                  <img
-                    style={{ borderRadius: "1rem" }}
-                    id="profile_pic"
+                <Box
+                  styles={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Avatar
+                    styles={{ margin: "0" }}
                     src={user.profile_pic_img_src}
                     alt={user.username}
-                    height="200"
                   />
+                  <h1>{user.username}'s Profile</h1>
                 </Box>
+
                 <Box>
                   <input
                     type="file"
