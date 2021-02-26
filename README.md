@@ -18,6 +18,17 @@ Running with React and React router dom the main features of this platform will 
 ![Favorites](./screenshots/3.jpg)
 ![Chat Room](./screenshots/4.jpg)
 
+
+## Before Running
+
+You must setup the AWS S3 connection with credentials. 
+
+```bash
+cp src/config.template.json src/config.json
+```
+
+Then fill in your aws credentials.
+
 # Create React App
 
 ## This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

@@ -8,7 +8,7 @@ import {
 } from "luxor-component-library";
 import { get_user_from_token, upload_profile_pic } from "../api/auth";
 import axios from "axios";
-
+import AWS from "aws-sdk";
 class Profile extends React.Component {
   constructor(props) {
     super(props);
@@ -16,11 +16,13 @@ class Profile extends React.Component {
       user: null,
       new_user: {},
       isLoaded: false,
+      s3_bucket: "jm-chat-app",
     };
     this.onUsernameChange = this.onUsernameChange.bind(this);
     this.onPasswordChange = this.onPasswordChange.bind(this);
     this.onEnterHandler = this.onEnterHandler.bind(this);
     this.imageUpload = this.imageUpload.bind(this);
+    this.imageDownload = this.imageDownload.bind(this);
   }
 
   onUsernameChange(e) {
@@ -34,6 +36,34 @@ class Profile extends React.Component {
 
   onEnterHandler(e) {
     e.preventDefault();
+  }
+  imageDownload() {
+    const mimes = {
+      jpeg: "data:image/jpeg;base64,",
+      png: "data:image/png;base64,",
+      jpg: "data:image/jpg;base64,",
+    };
+    function encode(data) {
+      var str = data.reduce(function (a, b) {
+        return a + String.fromCharCode(b);
+      }, "");
+      return btoa(str).replace(/.{76}(?=.)/g, "$&\n");
+    }
+    const s3_key = this.state.user.profile_pic_img_src;
+    const s3_bucket = this.state.s3_bucket;
+    let config = require("../config.json");
+    AWS.config.update(config);
+    AWS.config.credentials.get(function () {
+      var bucket = new AWS.S3({ params: { Bucket: s3_bucket } });
+      bucket.getObject({ Key: s3_key }, function (err, file) {
+        if (err) {
+          console.error(err);
+        } else {
+          var result = mimes.jpeg + encode(file.Body);
+          document.getElementById("profile_pic").src = result;
+        }
+      });
+    });
   }
   imageUpload(e) {
     e.preventDefault();
@@ -77,10 +107,11 @@ class Profile extends React.Component {
       .get(get_user_from_token)
       .then((response) => {
         this.setState({ user: response.data, isLoaded: true });
+        this.imageDownload();
       })
       .catch((err) => {
         localStorage.removeItem("token");
-        console.log("ERROR FETCHING CURRENT USER\n" + err);
+        console.log("ERROR FETCHING CURRENT USER and profile pic\n" + err);
       });
   }
 
@@ -116,7 +147,13 @@ class Profile extends React.Component {
                   <h1>{user.username} Profile</h1>
                 </Box>
                 <Box>
-                  <img src={user.profile_pic_img_src} alt={user.username} />
+                  <img
+                    style={{ borderRadius: "1rem" }}
+                    id="profile_pic"
+                    src={user.profile_pic_img_src}
+                    alt={user.username}
+                    height="200"
+                  />
                 </Box>
                 <Box>
                   <input
