@@ -19,22 +19,10 @@ import axios from "axios";
 var jsemoji = new EmojiConverter();
 jsemoji.replace_mode = "unified";
 jsemoji.allow_native = true;
-
-//var room_name = window.location.pathname.split("/")[
-//window.location.pathname.split("/").length - 1
-//];
-
 var client = null;
 
 function checkWebSocket(username, roomname) {
   if (client === null || client.readyState === WebSocket.CLOSED) {
-    //console.log(
-    //"setting websocket: " +
-    //"ws://localhost:8000/ws/" +
-    //roomname +
-    //"/" +
-    //username
-    //);
     client = new WebSocket(
       "ws://localhost:8000/ws/" + roomname + "/" + username
     );
@@ -66,13 +54,6 @@ class ChatModule extends React.Component {
   }
   checkWebSocketConnection() {
     if (client === null || client.readyState === WebSocket.CLOSED) {
-      //console.log("setting websocket");
-      //console.log(
-      //"ws://localhost:8000/ws/" +
-      //this.state.room_name +
-      //"/" +
-      //this.state.currentUser
-      //);
       client = new WebSocket(
         "ws://localhost:8000/ws/" +
           this.state.room_name +
@@ -89,11 +70,9 @@ class ChatModule extends React.Component {
     });
   }
   componentWillUnmount() {
-    //console.log("COMPONENT WILL UNMOUNT");
     //Disconnect websocket (Should update room members in db)
     if (client !== null && client.readyState === WebSocket.OPEN) {
       // Send dismissal message to BE
-      //console.log(this.state.room_name + " closing");
       var message_obj = {
         content: this.state.currentUser + " has left the chat",
         user: { username: this.state.currentUser },
@@ -109,21 +88,14 @@ class ChatModule extends React.Component {
         client.send(JSON.stringify(message_obj));
         this.setState({ message_draft: "" }, this.scrollToBottom);
       }
-      //console.log("Closing client on FE");
       client.close(1000, "Deliberate disconnection");
     }
-    //console.log("END COMPONENT WILL UNMOUNT");
   }
   onOpenEmoji() {
     let currentState = this.state.openEmoji;
-    //console.log("Current emoji state: " + currentState);
-    //console.log("Setting emoji state to: " + !currentState);
     this.setState({ openEmoji: !currentState });
   }
   onEmojiSelection(emoji_code, emoji_data) {
-    //console.log(emoji_code);
-    //console.info("Emoji code\n" + emoji_code);
-    //console.info("Emoji data\n" + emoji_data);
     let e = emoji_data.emoji;
     let _message =
       this.state.message_draft === undefined ? "" : this.state.message_draft;
@@ -131,7 +103,6 @@ class ChatModule extends React.Component {
   }
 
   componentDidMount() {
-    //console.log("--- COMPONENT DID MOUNT ---");
     let token = localStorage.getItem("token");
     const instance = axios.create({
       timeout: 1000,
@@ -203,7 +174,6 @@ class ChatModule extends React.Component {
                     );
                   }
                 };
-                //console.log("--- END COMPONENT DID MOUNT ---");
               })
               .catch((err) => {
                 localStorage.removeItem("token");
