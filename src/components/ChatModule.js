@@ -410,11 +410,8 @@ class ChatModule extends React.Component {
                 />
                 <Button
                   variant="outline"
-                  color="error"
+                  color="primary"
                   size="medium"
-                  style={{
-                    border: `2px solid ${defaultTheme.palette.error.main}`,
-                  }}
                   text="Send"
                   onClick={this.onClickHandler}
                 />

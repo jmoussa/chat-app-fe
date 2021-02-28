@@ -198,7 +198,7 @@ class Home extends React.Component {
       width: "400px",
       borderRadius: "3em",
       outline: "none",
-      border: `2px solid ${defaultTheme.palette.error.main}`,
+      border: `2px solid ${defaultTheme.palette.secondary.light}`,
       fontWeight: 400,
       fontSize: fontSizes.medium,
       fontFamily: defaultTheme.typography.primaryFontFamily,
@@ -258,11 +258,15 @@ class Home extends React.Component {
             </Row>
             <Box>
               <h1>Rooms</h1>
-              <Stack space="medium">
+              <Box
+                textAlign="center"
+                padding="small"
+                style={{ justifyContent: "center", height: "300px" }}
+              >
                 {rooms.map((room, index) => {
                   if (user.favorites.includes(room.room_name)) {
                     return (
-                      <Box>
+                      <Box margin="small">
                         <Chip
                           icon={FavoriteIcon}
                           onClick={(e) => this.handleRoomClick(e)}
@@ -278,7 +282,7 @@ class Home extends React.Component {
                     );
                   } else {
                     return (
-                      <Box>
+                      <Box margin="20px">
                         <Chip
                           icon={FavoriteBorderIcon}
                           onClick={(e) => this.handleRoomClick(e)}
@@ -292,7 +296,7 @@ class Home extends React.Component {
                     );
                   }
                 })}
-              </Stack>
+              </Box>
             </Box>
           </Stack>
         </Box>

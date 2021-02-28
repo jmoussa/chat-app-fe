@@ -112,7 +112,7 @@ class Login extends React.Component {
       width: "400px",
       borderRadius: "3em",
       outline: "none",
-      border: `2px solid ${defaultTheme.palette.error.main}`,
+      border: `2px solid ${defaultTheme.palette.primary.main}`,
       fontWeight: 400,
       fontSize: fontSizes.medium,
       fontFamily: defaultTheme.typography.primaryFontFamily,
@@ -133,6 +133,20 @@ class Login extends React.Component {
           }}
         >
           <Stack>
+            <Box
+              style={{ fontSize: "2rem" }}
+              color={defaultTheme.palette.secondary.light}
+              paddingBottom="large"
+            >
+              <span>
+                <h1 style={{ color: defaultTheme.palette.secondary.light }}>
+                  Minimal
+                </h1>
+                <h1 style={{ color: defaultTheme.palette.primary.main }}>
+                  Chat.
+                </h1>
+              </span>
+            </Box>
             <Stack space="medium" padding="medium">
               <Box>
                 <input
