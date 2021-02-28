@@ -1,14 +1,11 @@
 import React from "react";
-import {
-  Box,
-  //Button,
-  //Row,
-  Stack,
-  defaultTheme,
-  fontSizes,
-} from "luxor-component-library";
+import { Box, Button, defaultTheme } from "luxor-component-library";
+import { twilio } from "../api/auth";
+import { Redirect } from "react-router-dom";
 import { get_room, put_user_into_room } from "../api/rooms";
 import { get_user_from_token } from "../api/auth";
+import Participant from "./Participant";
+
 import axios from "axios";
 const { connect } = require("twilio-video");
 
@@ -18,31 +15,88 @@ class VideoChatModule extends React.Component {
     this.messagesEndRef = React.createRef();
     this.state = {
       isLoaded: false,
+      redirectToDash: false,
       openEmoji: false,
       currentUser: this.props.user,
       identity: "",
       room: null,
     };
-    this.onEnterHandler = this.onEnterHandler.bind(this);
+    this.leaveRoom = this.leaveRoom.bind(this);
+    this.returnToLobby = this.returnToLobby.bind(this);
+    this.addParticipant = this.addParticipant.bind(this);
+    this.removeParticipant = this.removeParticipant.bind(this);
   }
+
+  leaveRoom() {
+    try {
+      this.state.room.disconnect();
+    } catch (e) {
+      console.warning(e);
+    }
+    this.returnToLobby();
+  }
+
+  addParticipant(participant) {
+    console.log(`${participant.identity} has joined the room.`);
+
+    this.setState({
+      remoteParticipants: [...this.state.remoteParticipants, participant],
+    });
+  }
+
+  removeParticipant(participant) {
+    console.log(`${participant.identity} has left the room`);
+
+    this.setState({
+      remoteParticipants: this.state.remoteParticipants.filter(
+        (p) => p.identity !== participant.identity
+      ),
+    });
+  }
+
   async joinRoom() {
     try {
       // Get access token
-      const response = await fetch(
-        `https://{your-endpoint}?identity=${this.state.identity}`
-      );
-      const data = await response.json();
+      let token = localStorage.getItem("token");
+      const instance = axios.create({
+        timeout: 1000,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const response = await instance.get(twilio + "/" + this.state.room_name);
+      const data = response.data;
+      console.log(data);
+
       // Join Room
       const room = await connect(data.accessToken, {
         name: this.state.room_name,
         audio: true,
         video: true,
       });
-
-      this.setState({ room: room });
+      this.setState({
+        remoteParticipants: Array.from(room.participants.values()),
+      });
+      this.setState({ room: room, isLoaded: true });
+      this.state.room.on("participantConnected", (participant) =>
+        this.addParticipant(participant)
+      );
+      this.state.room.on("participantDisconnected", (participant) =>
+        this.removeParticipant(participant)
+      );
+      window.addEventListener("beforeunload", this.leaveRoom);
     } catch (err) {
       console.log(err);
     }
+  }
+
+  returnToLobby() {
+    this.setState({ room: null, redirectToDash: true });
+  }
+
+  componentWillUnmount() {
+    this.leaveRoom();
   }
 
   componentDidMount() {
@@ -60,6 +114,7 @@ class VideoChatModule extends React.Component {
       .then((res) => {
         this.setState({
           currentUser: res.data.username,
+          identity: res.data.username,
           user: res.data,
         });
         instance
@@ -71,7 +126,8 @@ class VideoChatModule extends React.Component {
             instance
               .get(get_room + "/" + decodeURIComponent(this.props.room_name))
               .then((room) => {
-                this.setState({ ...room.data, isLoaded: true });
+                this.setState({ ...room.data });
+                this.joinRoom();
               })
               .catch((err) => {
                 localStorage.removeItem("token");
@@ -88,30 +144,8 @@ class VideoChatModule extends React.Component {
       });
   }
 
-  onEnterHandler = (event) => {
-    // Number 13 is the "Enter" key on the keyboard
-    if (event.keyCode === 13) {
-      // Trigger the button element with a click
-      event.preventDefault();
-      console.log("Enter event!");
-    }
-  };
-
   render() {
-    const input_text_style = {
-      padding: "10px",
-      paddingLeft: "25px",
-      paddingRight: "25px",
-      width: "600px",
-      borderRadius: "3em",
-      outline: "none",
-      border: `2px solid ${defaultTheme.palette.error.main}`,
-      fontWeight: 400,
-      fontSize: fontSizes.medium,
-      fontFamily: defaultTheme.typography.primaryFontFamily,
-      color: defaultTheme.palette.grey[400],
-    };
-    const { isLoaded, members, room_name } = this.state;
+    const { isLoaded, redirectToDash, room_name } = this.state;
     if (!isLoaded) {
       return (
         <Box
@@ -125,9 +159,11 @@ class VideoChatModule extends React.Component {
           <h1>Loading...</h1>
         </Box>
       );
+    } else if (redirectToDash && room_name !== null) {
+      return <Redirect push to={"/dashboard/" + room_name} />;
     } else {
       return (
-        <Stack
+        <Box
           padding="medium"
           roundedCorners
           style={{
@@ -136,24 +172,30 @@ class VideoChatModule extends React.Component {
             width: "800px",
           }}
         >
-          <Box padding="medium">
-            <h1>{room_name} Video Chat</h1>
-          </Box>
-          {members.map((member, index) => {
-            return (
-              <Box
-                padding="small"
-                color={defaultTheme.palette.common.black}
-                marginBottom="small"
-                textAlign="center"
-                key={{ index }}
-                roundedCorners
-              >
-                {member.username}
-              </Box>
-            );
-          })}
-        </Stack>
+          <div className="room">
+            <div className="participants">
+              <Participant
+                key={this.state.room.localParticipant.identity}
+                localParticipant="true"
+                participant={this.state.room.localParticipant}
+              />
+              {this.state.remoteParticipants.map((participant) => (
+                <Participant
+                  key={participant.identity}
+                  participant={participant}
+                />
+              ))}
+            </div>
+            <Button
+              variant="solid"
+              color={defaultTheme.palette.error.main}
+              size="large"
+              text="Leave Room"
+              id="leaveRoom"
+              onClick={this.leaveRoom}
+            />
+          </div>
+        </Box>
       );
     }
   }

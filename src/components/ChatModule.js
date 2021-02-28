@@ -3,6 +3,8 @@ import { animateScroll } from "react-scroll";
 import EmojiPicker from "emoji-picker-react";
 import EmojiConverter from "emoji-js";
 import SentimentVerySatisfiedIcon from "@material-ui/icons/SentimentVerySatisfied";
+import VideoCallIcon from "@material-ui/icons/VideoCall";
+import { Redirect } from "react-router-dom";
 
 import {
   Box,
@@ -48,6 +50,7 @@ class ChatModule extends React.Component {
     this.onEnterHandler = this.onEnterHandler.bind(this);
     this.onOpenEmoji = this.onOpenEmoji.bind(this);
     this.onEmojiSelection = this.onEmojiSelection.bind(this);
+    this.onOpenVideoChat = this.onOpenVideoChat.bind(this);
   }
   onInputChange(event) {
     this.setState({ message_draft: event.target.value });
@@ -61,6 +64,11 @@ class ChatModule extends React.Component {
           this.state.currentUser
       );
     }
+  }
+
+  onOpenVideoChat() {
+    //const { room_name, currentUser } = this.state;
+    this.setState({ openVideoChat: true });
   }
 
   scrollToBottom() {
@@ -233,7 +241,13 @@ class ChatModule extends React.Component {
       fontFamily: defaultTheme.typography.primaryFontFamily,
       color: defaultTheme.palette.grey[400],
     };
-    const { isLoaded, messages, members } = this.state;
+    const {
+      isLoaded,
+      messages,
+      members,
+      openVideoChat,
+      room_name,
+    } = this.state;
     if (!isLoaded) {
       return (
         <Box
@@ -247,6 +261,8 @@ class ChatModule extends React.Component {
           <h1>Loading...</h1>
         </Box>
       );
+    } else if (openVideoChat) {
+      return <Redirect push to={"/video/" + room_name} />;
     } else {
       return (
         <Row width="100%">
@@ -381,11 +397,18 @@ class ChatModule extends React.Component {
                     border: `2px solid ${defaultTheme.palette.error.main}`,
                   }}
                   onClick={this.onOpenEmoji}
-                  text={
-                    <SentimentVerySatisfiedIcon
-                    //style={{ marginRight: "10px" }}
-                    />
-                  }
+                  text={<SentimentVerySatisfiedIcon />}
+                />
+                <Button
+                  variant="outline"
+                  color="error"
+                  size="small"
+                  style={{
+                    marginRight: "10px",
+                    border: `2px solid ${defaultTheme.palette.error.main}`,
+                  }}
+                  onClick={this.onOpenVideoChat}
+                  text={<VideoCallIcon />}
                 />
                 <Button
                   variant="outline"
