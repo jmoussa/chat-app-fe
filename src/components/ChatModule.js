@@ -3,6 +3,8 @@ import { animateScroll } from "react-scroll";
 import EmojiPicker from "emoji-picker-react";
 import EmojiConverter from "emoji-js";
 import SentimentVerySatisfiedIcon from "@material-ui/icons/SentimentVerySatisfied";
+import VideoCallIcon from "@material-ui/icons/VideoCall";
+import { Redirect } from "react-router-dom";
 
 import {
   Box,
@@ -19,22 +21,10 @@ import axios from "axios";
 var jsemoji = new EmojiConverter();
 jsemoji.replace_mode = "unified";
 jsemoji.allow_native = true;
-
-//var room_name = window.location.pathname.split("/")[
-//window.location.pathname.split("/").length - 1
-//];
-
 var client = null;
 
 function checkWebSocket(username, roomname) {
   if (client === null || client.readyState === WebSocket.CLOSED) {
-    //console.log(
-    //"setting websocket: " +
-    //"ws://localhost:8000/ws/" +
-    //roomname +
-    //"/" +
-    //username
-    //);
     client = new WebSocket(
       "ws://localhost:8000/ws/" + roomname + "/" + username
     );
@@ -60,19 +50,13 @@ class ChatModule extends React.Component {
     this.onEnterHandler = this.onEnterHandler.bind(this);
     this.onOpenEmoji = this.onOpenEmoji.bind(this);
     this.onEmojiSelection = this.onEmojiSelection.bind(this);
+    this.onOpenVideoChat = this.onOpenVideoChat.bind(this);
   }
   onInputChange(event) {
     this.setState({ message_draft: event.target.value });
   }
   checkWebSocketConnection() {
     if (client === null || client.readyState === WebSocket.CLOSED) {
-      //console.log("setting websocket");
-      //console.log(
-      //"ws://localhost:8000/ws/" +
-      //this.state.room_name +
-      //"/" +
-      //this.state.currentUser
-      //);
       client = new WebSocket(
         "ws://localhost:8000/ws/" +
           this.state.room_name +
@@ -82,6 +66,11 @@ class ChatModule extends React.Component {
     }
   }
 
+  onOpenVideoChat() {
+    //const { room_name, currentUser } = this.state;
+    this.setState({ openVideoChat: true });
+  }
+
   scrollToBottom() {
     animateScroll.scrollToBottom({
       containerId: "message-list",
@@ -89,11 +78,9 @@ class ChatModule extends React.Component {
     });
   }
   componentWillUnmount() {
-    //console.log("COMPONENT WILL UNMOUNT");
     //Disconnect websocket (Should update room members in db)
     if (client !== null && client.readyState === WebSocket.OPEN) {
       // Send dismissal message to BE
-      //console.log(this.state.room_name + " closing");
       var message_obj = {
         content: this.state.currentUser + " has left the chat",
         user: { username: this.state.currentUser },
@@ -109,21 +96,14 @@ class ChatModule extends React.Component {
         client.send(JSON.stringify(message_obj));
         this.setState({ message_draft: "" }, this.scrollToBottom);
       }
-      //console.log("Closing client on FE");
       client.close(1000, "Deliberate disconnection");
     }
-    //console.log("END COMPONENT WILL UNMOUNT");
   }
   onOpenEmoji() {
     let currentState = this.state.openEmoji;
-    //console.log("Current emoji state: " + currentState);
-    //console.log("Setting emoji state to: " + !currentState);
     this.setState({ openEmoji: !currentState });
   }
   onEmojiSelection(emoji_code, emoji_data) {
-    //console.log(emoji_code);
-    //console.info("Emoji code\n" + emoji_code);
-    //console.info("Emoji data\n" + emoji_data);
     let e = emoji_data.emoji;
     let _message =
       this.state.message_draft === undefined ? "" : this.state.message_draft;
@@ -131,7 +111,6 @@ class ChatModule extends React.Component {
   }
 
   componentDidMount() {
-    //console.log("--- COMPONENT DID MOUNT ---");
     let token = localStorage.getItem("token");
     const instance = axios.create({
       timeout: 1000,
@@ -203,7 +182,6 @@ class ChatModule extends React.Component {
                     );
                   }
                 };
-                //console.log("--- END COMPONENT DID MOUNT ---");
               })
               .catch((err) => {
                 localStorage.removeItem("token");
@@ -263,7 +241,13 @@ class ChatModule extends React.Component {
       fontFamily: defaultTheme.typography.primaryFontFamily,
       color: defaultTheme.palette.grey[400],
     };
-    const { isLoaded, messages, members } = this.state;
+    const {
+      isLoaded,
+      messages,
+      members,
+      openVideoChat,
+      room_name,
+    } = this.state;
     if (!isLoaded) {
       return (
         <Box
@@ -277,6 +261,8 @@ class ChatModule extends React.Component {
           <h1>Loading...</h1>
         </Box>
       );
+    } else if (openVideoChat) {
+      return <Redirect push to={"/video/" + room_name} />;
     } else {
       return (
         <Row width="100%">
@@ -411,11 +397,18 @@ class ChatModule extends React.Component {
                     border: `2px solid ${defaultTheme.palette.error.main}`,
                   }}
                   onClick={this.onOpenEmoji}
-                  text={
-                    <SentimentVerySatisfiedIcon
-                    //style={{ marginRight: "10px" }}
-                    />
-                  }
+                  text={<SentimentVerySatisfiedIcon />}
+                />
+                <Button
+                  variant="outline"
+                  color="error"
+                  size="small"
+                  style={{
+                    marginRight: "10px",
+                    border: `2px solid ${defaultTheme.palette.error.main}`,
+                  }}
+                  onClick={this.onOpenVideoChat}
+                  text={<VideoCallIcon />}
                 />
                 <Button
                   variant="outline"
