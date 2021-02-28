@@ -136,16 +136,14 @@ class ChatModule extends React.Component {
             instance
               .get(get_room + "/" + decodeURIComponent(this.props.room_name))
               .then((response) => {
-                this.setState(
-                  { ...response.data, isLoaded: true },
-                  this.scrollToBottom
-                );
+                this.setState({ ...response.data });
                 console.log("Connecting Websocket");
                 client = checkWebSocket(
                   res.data.username,
                   response.data.room_name
                 );
                 client.onopen = () => {
+                  this.setState({ isLoaded: true }, this.scrollToBottom);
                   console.log("WebSocket Client Connected");
                 };
                 client.onclose = () => {

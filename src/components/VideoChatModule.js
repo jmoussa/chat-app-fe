@@ -31,7 +31,7 @@ class VideoChatModule extends React.Component {
     try {
       this.state.room.disconnect();
     } catch (e) {
-      console.warning(e);
+      console.error(e);
     }
     this.returnToLobby();
   }
@@ -85,6 +85,13 @@ class VideoChatModule extends React.Component {
       this.state.room.on("participantDisconnected", (participant) =>
         this.removeParticipant(participant)
       );
+      this.state.room.on("disconnected", (room) => {
+        // Detach the local media elements
+        room.localParticipant.tracks.forEach((publication) => {
+          const attachedElements = publication.track.detach();
+          attachedElements.forEach((element) => element.remove());
+        });
+      });
       window.addEventListener("beforeunload", this.leaveRoom);
     } catch (err) {
       console.log(err);
