@@ -9,7 +9,8 @@ Running with React and React router dom the main features of this platform will 
 - Login/Authentication System
 - Chat Room Lobby
 - Favorite Rooms filter option in navbar
-- Websocket Group Chat
+- Websocket Group Chat (w/emoji support)
+- Twilio-enabled Video Chat
 
 ## Screenshots
 
@@ -28,6 +29,9 @@ cp src/config.template.json src/config.json
 ```
 
 Then fill in your aws credentials.
+
+
+---
 
 # Create React App
 
